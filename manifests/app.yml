@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: cloudorbit.azurecr.io/pythonapp
+        image: gcr.io/searce-academy/rohan-ci-cd/pythonapp
         imagePullPolicy: Always
 
 ---
