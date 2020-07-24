@@ -21,7 +21,7 @@ spec:
         name: jenkins-app
     spec:
       containers:
-      - name: test
+      - name: jenkins-app
         image: gcr.io/searce-academy/rohan-ci-cd/jenkinsapp
         imagePullPolicy: Always
 
