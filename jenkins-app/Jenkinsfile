@@ -31,13 +31,13 @@ pipeline {
             }
             steps {
                 dir ('jenkins-app') {
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'   
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'
+                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest .'
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'   
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'
                 }
             }
         }
@@ -47,13 +47,13 @@ pipeline {
             }
             steps {
                 dir ('jenkins-app') {
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'   
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'  
+                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest .'
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'   
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'  
                 }
             }
         }
@@ -62,7 +62,7 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh 'kubectl --namespace jenkins-dev --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
+                sh 'kubectl --namespace jenkins-dev --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
             }
         }
         stage ('deploy to kubernetes cluster - uat') {
@@ -70,7 +70,7 @@ pipeline {
                 branch 'uat'
             }
             steps {
-                sh 'kubectl --namespace jenkins-uat --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
+                sh 'kubectl --namespace jenkins-uat --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
             }
         }
     }
