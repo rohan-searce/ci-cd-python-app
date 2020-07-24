@@ -97,7 +97,7 @@ spec:
                         url: 'https://github.com/rohan-searce/ci-cd-python-app.git'
                 }
 
-                dir (param.serviceFolderName) {
+                dir ('jenkins-app') {
                     container('python-382'){
                         sh 'python -v'
                         sh 'python app.yml'
@@ -110,7 +110,7 @@ spec:
                 branch 'master'
             }
             steps {
-                dir (param.serviceFolderName) {
+                dir ('jenkins-app') {
                     container('python-382'){
                         sh 'python --version'
                     }
@@ -131,7 +131,7 @@ spec:
             }
             steps {
 
-                dir (param.serviceFolderName) {
+                dir ('jenkins-app') {
                     container('python-382'){
                         sh 'python --version'
                     }
