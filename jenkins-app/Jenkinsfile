@@ -31,7 +31,7 @@ pipeline {
             }
             steps {
                 dir ('jenkins-app') {
-                    sh 'docker build --file Dockerfile --tag gcr.io/ipweb-240115/ms/dev/admin:$BUILD_NUMBER --tag gcr.io/ipweb-240115/ms/dev/admin:latest .'
+                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest .'
                     sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'   
                     sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'   
                     sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
