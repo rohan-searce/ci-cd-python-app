@@ -5,20 +5,14 @@ pipeline {
         JenkinsDockerGCRSecret = credentials('jenkins-docker-gcr-secret')
     }
     stages {
-        stage ('git clone - dev') {
+        stage ('git clone - master') {
             when {
-                branch 'dev'
+                branch 'master'
             }
             steps{
-                sh '#printenv | sort'
-                sh '#cat $JenkinsDockerGCRSecret'
-                
-                git branch: 'dev',
-                    credentialsId: 'Manish-Github-Account-Credentials',
-                    url: 'https://github.com/Techolution/cybris.ms.git'
-                
-                sh '#ls -a'
-                sh '#pwd'
+                git branch: 'master',
+                    credentialsId: 'Rohan-Github-Account-Credentials',
+                    url: 'https://github.com/rohan-searce/python-app-with-azure-kubernetes.git'
             }
         }
         stage ('git clone - uat') {
@@ -26,96 +20,24 @@ pipeline {
                 branch 'uat'
             }
             steps{
-                sh '#printenv | sort'
-                sh '#cat $JenkinsDockerGCRSecret'
-                
                 git branch: 'uat',
-                    credentialsId: 'Manish-Github-Account-Credentials',
-                    url: 'https://github.com/Techolution/cybris.ms.git'
-                
-                sh '#ls -a'
-                sh '#pwd'
+                    credentialsId: 'Rohan-Github-Account-Credentials',
+                    url: 'https://github.com/rohan-searce/python-app-with-azure-kubernetes.git'
             }
         }
-        stage ('git clone - prod') {
+        stage ('build admin service into docker image - master') {
             when {
-                branch 'prod'
-            }
-            steps{
-                sh '#printenv | sort'
-                sh '#cat $JenkinsDockerGCRSecret'
-                
-                git branch: 'prod',
-                    credentialsId: 'Manish-Github-Account-Credentials',
-                    url: 'https://github.com/Techolution/cybris.ms.git'
-                
-                sh '#ls -a'
-                sh '#pwd'
-            }
-        }
-        stage('Feature Branch Build') {
-            when {
-                expression { BRANCH_NAME != 'dev' && BRANCH_NAME != 'uat' && BRANCH_NAME != 'prod'}
-            }
-            steps{
-                echo "hello"
-                echo "${BRANCH_NAME}"
-
-                git branch: '${BRANCH_NAME}',
-                    credentialsId: 'Manish-Github-Account-Credentials',
-                    url: 'https://github.com/Techolution/cybris.ms.git'
-                    
-                dir ('admin-service') {
-                    sh '#ls -a'
-                    sh '#docker images'
-                    sh 'gradle -v'
-                    sh 'gradle clean'
-                    sh 'gradle build -x test --no-daemon'
-                    sh '#docker build --file Dockerfile --tag gcr.io/ipweb-240115/ms/featurebranch/admin:$BUILD_NUMBER .'
-                    sh '#docker image ls gcr.io/ipweb-240115/ms/featurebranch/admin:$BUILD_NUMBER'
-                    sh '#docker image rm gcr.io/ipweb-240115/ms/featurebranch/admin:$BUILD_NUMBER'
-                }       
-            }
-        }
-        /*
-        stage('Static Code Analysis') {
-            steps{               
-                echo "${BRANCH_NAME}"
-
-                git branch: '${BRANCH_NAME}',
-                    credentialsId: 'Manish-Github-Account-Credentials',
-                    url: 'https://github.com/Techolution/cybris.ms.git'
-                    
-                dir ('admin-service') {
-                    sh '#ls -a'
-                    sh 'gradle -v'
-                    sh 'gradle clean'
-                    sh 'gradle build -x test --no-daemon'
-                    sh 'gradle sonarqube -Dsonar.host.url=http://35.232.197.73:9000 -Dsonar.login=fe20956fde63156aa965ab740dd446fa66dfb2e1 --no-daemon'
-                }       
-            }
-        }
-        */
-        stage ('build admin service into docker image - dev') {
-            when {
-                branch 'dev'
+                branch 'master'
             }
             steps {
-                dir ('admin-service') {
-                    sh '#ls -a'
-                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
-                    sh '#docker images'
-                    sh 'gradle -v'
-                    sh 'gradle clean'
-                    sh 'gradle build -x test --no-daemon'
+                dir ('jenkins-app') {
                     sh 'docker build --file Dockerfile --tag gcr.io/ipweb-240115/ms/dev/admin:$BUILD_NUMBER --tag gcr.io/ipweb-240115/ms/dev/admin:latest .'
-                    sh '#docker images'
-                    sh 'docker push gcr.io/ipweb-240115/ms/dev/admin:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/ipweb-240115/ms/dev/admin:latest'   
-                    sh 'docker image ls gcr.io/ipweb-240115/ms/dev/admin:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/ipweb-240115/ms/dev/admin:latest'
-                    sh 'docker image rm gcr.io/ipweb-240115/ms/dev/admin:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/ipweb-240115/ms/dev/admin:latest'
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'   
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'
                 }
             }
         }
@@ -124,53 +46,23 @@ pipeline {
                 branch 'uat'
             }
             steps {
-                dir ('admin-service') {
-                    sh '#ls -a'
-                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
-                    sh '#docker images'
-                    sh 'gradle -v'
-                    sh 'gradle clean'
-                    sh 'gradle build -x test --no-daemon'
-                    sh 'docker build --file Dockerfile --tag gcr.io/ipweb-240115/ms/uat/admin:$BUILD_NUMBER --tag gcr.io/ipweb-240115/ms/uat/admin:latest .'
-                    sh '#docker images'
-                    sh 'docker push gcr.io/ipweb-240115/ms/uat/admin:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/ipweb-240115/ms/uat/admin:latest'   
-                    sh 'docker image ls gcr.io/ipweb-240115/ms/uat/admin:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/ipweb-240115/ms/uat/admin:latest'
-                    sh 'docker image rm gcr.io/ipweb-240115/ms/uat/admin:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/ipweb-240115/ms/uat/admin:latest'  
+                dir ('jenkins-app') {
+                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest .'
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'   
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
+                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/pythonapp:latest'  
                 }
             }
         }
-        stage ('build admin service into docker image - prod') {
+        stage ('deploy to kubernetes cluster - master') {
             when {
-                branch 'prod'
+                branch 'master'
             }
             steps {
-                dir ('admin-service') {
-                    sh '#ls -a'
-                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
-                    sh '#docker images'
-                    sh 'gradle -v'
-                    sh 'gradle clean'
-                    sh 'gradle build -x test --no-daemon'
-                    sh 'docker build --file Dockerfile --tag gcr.io/ipweb-240115/ms/prod/admin:$BUILD_NUMBER --tag gcr.io/ipweb-240115/ms/prod/admin:latest .'
-                    sh '#docker images'
-                    sh 'docker push gcr.io/ipweb-240115/ms/prod/admin:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/ipweb-240115/ms/prod/admin:latest'   
-                    sh 'docker image ls gcr.io/ipweb-240115/ms/prod/admin:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/ipweb-240115/ms/prod/admin:latest'
-                    sh 'docker image rm gcr.io/ipweb-240115/ms/prod/admin:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/ipweb-240115/ms/prod/admin:latest'  
-                }
-            }
-        }
-        stage ('deploy to kubernetes cluster - dev') {
-            when {
-                branch 'dev'
-            }
-            steps {
-                sh 'kubectl --namespace dev --cluster gke_ipweb-240115_us-central1-a_gke-ipcypris-dev-uat set image deployment admin admin=gcr.io/ipweb-240115/ms/dev/admin:$BUILD_NUMBER'
+                sh 'kubectl --namespace jenkins-dev --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
             }
         }
         stage ('deploy to kubernetes cluster - uat') {
@@ -178,49 +70,8 @@ pipeline {
                 branch 'uat'
             }
             steps {
-                sh 'kubectl --namespace uat --cluster gke_ipweb-240115_us-central1-a_gke-ipcypris-dev-uat set image deployment admin admin=gcr.io/ipweb-240115/ms/uat/admin:$BUILD_NUMBER'
+                sh 'kubectl --namespace jenkins-uat --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/pythonapp:$BUILD_NUMBER'
             }
-        }
-        stage ('deploy to kubernetes cluster - prod') {
-            when {
-                branch 'prod'
-            }
-            steps {
-                sh 'kubectl --namespace prod --cluster gke_ipweb-240115_us-central1_gke-prod set image deployment admin admin=gcr.io/ipweb-240115/ms/prod/admin:$BUILD_NUMBER'
-            }
-        }
-    }
-    post {
-        always {
-            // slackSend (
-            //     color: '#F7A200', 
-            //     message: "${env.JOB_NAME} - #BUILD_NUMBER:${env.BUILD_NUMBER} #BRANCH_NAME:${env.BRANCH_NAME} #CHANGE_AUTHOR:${env.CHANGE_AUTHOR} #CHANGE_AUTHOR_DISPLAY_NAME:${env.CHANGE_AUTHOR_DISPLAY_NAME} #CHANGE_TARGET:${env.CHANGE_TARGET} Started"
-            // )
-            slackSend (
-                color: '#F7A200', 
-                message: "STARTED: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}"
-            )
-            deleteDir()
-        }
-        success {
-            // slackSend (
-            //     color: '#00FF00', 
-            //     message: "${env.JOB_NAME} - #BUILD_NUMBER:${env.BUILD_NUMBER} #BRANCH_NAME:${env.BRANCH_NAME} #CHANGE_AUTHOR:${env.CHANGE_AUTHOR} #displayName:${currentBuild.displayName} #fullDisplayName:${currentBuild.fullDisplayName} #CHANGE_AUTHOR_DISPLAY_NAME:${env.CHANGE_AUTHOR_DISPLAY_NAME} #CHANGE_TARGET:${env.CHANGE_TARGET} #BUILD_DURATION:${currentBuild.durationString} Success" 
-            // )
-            slackSend (
-                color: '#00FF00', 
-                message: "SUCCESS: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}"
-            )
-        }
-        failure {
-            // slackSend (
-            //     color: '#FF0000', 
-            //     message: "${env.JOB_NAME} - #BUILD_NUMBER:${env.BUILD_NUMBER} #BRANCH_NAME:${env.BRANCH_NAME} #CHANGE_AUTHOR:${env.CHANGE_AUTHOR} #CHANGE_AUTHOR_DISPLAY_NAME:${env.CHANGE_AUTHOR_DISPLAY_NAME} #CHANGE_TARGET:${env.CHANGE_TARGET} #BUILD_DURATION:${env.BUILD_DURATION} Failed (${env.BUILD_URL})"
-            // )   
-            slackSend (
-                color: '#FF0000', 
-                message: "FAILURE: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}"
-            )
         }
     }
 }
