@@ -1,11 +1,9 @@
 
 pipeline {
     agent any
-    /*
     environment {
         JenkinsDockerGCRSecret = credentials('jenkins-docker-gcr-secret')
     }
-    */
     stages {
         stage ('git clone - master') {
             when {
@@ -33,6 +31,7 @@ pipeline {
             }
             steps {
                 dir ('jenkins-app') {
+                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
                     sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest .'
                     sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'   
                     sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'   
@@ -49,6 +48,7 @@ pipeline {
             }
             steps {
                 dir ('jenkins-app') {
+                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
                     sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest .'
                     sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'   
                     sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'   
