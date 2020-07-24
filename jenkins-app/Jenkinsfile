@@ -1,9 +1,11 @@
 
 pipeline {
     agent any
+    /*
     environment {
         JenkinsDockerGCRSecret = credentials('jenkins-docker-gcr-secret')
     }
+    */
     stages {
         stage ('git clone - master') {
             when {
