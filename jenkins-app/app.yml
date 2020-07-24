@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: python-app
+  name: jenkins-app
   labels:
-    name: python-app
+    name: jenkins-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: python-app
+      name: jenkins-app
   minReadySeconds: 60
   strategy:
     type: RollingUpdate
@@ -18,38 +18,38 @@ spec:
   template:
     metadata:
       labels:
-        name: python-app
+        name: jenkins-app
     spec:
       containers:
       - name: test
-        image: gcr.io/searce-academy/rohan-ci-cd/pythonapp
+        image: gcr.io/searce-academy/rohan-ci-cd/jenkinsapp
         imagePullPolicy: Always
 
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: python-app
+  name: jenkins-app
 spec:
   selector:
-    name: python-app
+    name: jenkins-app
   ports:
     - name: port1
       protocol: TCP
-      port: 5000
-      targetPort: 5000
+      port: 5001
+      targetPort: 5001
   type: LoadBalancer
 
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: python-app
+  name: jenkins-app
 spec:
   maxReplicas: 3
   minReplicas: 1
   scaleTargetRef:
     apiVersion: extensions/v1beta1
     kind: Deployment
-    name: python-app
+    name: jenkins-app
   targetCPUUtilizationPercentage: 80
