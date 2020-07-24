@@ -1,6 +1,62 @@
-
 pipeline {
-    agent any
+    agent {
+    kubernetes {
+      defaultContainer 'jnlp'
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+      run: jnlp
+spec:
+  containers:
+  - name: git
+    image: gcr.io/cloud-builders/git
+    command:
+    - cat
+    tty: true
+  - name: python-382
+    image: registry.hub.docker.com/library/python:3.8.2
+    command:
+    - cat
+    tty: true
+  - name: busybox
+    image: busybox
+    command:
+    - cat
+    tty: true
+  - name: gcloud
+    image: google/cloud-sdk:latest
+    command:
+    - cat
+    tty: true   
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /secret
+    env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /secret/kaniko-secret.json         
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command:
+    - /busybox/cat
+    tty: true
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /secret
+    env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /secret/kaniko-secret.json
+  volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: kaniko-secret
+  imagePullSecrets:
+  - name: jenkins-image-pull-secret      
+
+"""
+   }
+}
     environment {
         JenkinsDockerGCRSecret = credentials('jenkins-docker-gcr-secret')
     }
@@ -10,9 +66,12 @@ pipeline {
                 branch 'master'
             }
             steps{
-                git branch: 'master',
-                    credentialsId: 'Rohan-Github-Account-Credentials',
-                    url: 'https://github.com/rohan-searce/python-app-with-azure-kubernetes.git'
+                container('git'){
+
+                    git branch: 'master',
+                        credentialsId: 'Rohan-Github-Account-Credentials',
+                        url: 'https://github.com/rohan-searce/ci-cd-python-app.git'
+                }
             }
         }
         stage ('git clone - uat') {
@@ -20,42 +79,70 @@ pipeline {
                 branch 'uat'
             }
             steps{
-                git branch: 'uat',
-                    credentialsId: 'Rohan-Github-Account-Credentials',
-                    url: 'https://github.com/rohan-searce/python-app-with-azure-kubernetes.git'
+                container('git'){
+                    git branch: 'uat',
+                        credentialsId: 'Rohan-Github-Account-Credentials',
+                        url: 'https://github.com/rohan-searce/ci-cd-python-app.git'
+                }
             }
         }
-        stage ('build admin service into docker image - master') {
+        stage('Feature Branch Build') {
+            when {
+                expression { BRANCH_NAME != 'master' && BRANCH_NAME != 'uat' && BRANCH_NAME != 'prod'}
+            }
+            steps{
+                container('git'){
+                    git branch: '${BRANCH_NAME}',
+                        credentialsId: 'Rohan-Github-Account-Credentials',
+                        url: 'https://github.com/rohan-searce/ci-cd-python-app.git'
+                }
+
+                dir (param.serviceFolderName) {
+                    container('python-382'){
+                        sh 'python -v'
+                        sh 'python app.yml'
+                    }
+                }  
+            }
+        }
+        stage ('build service into docker image - master') {
             when {
                 branch 'master'
             }
             steps {
-                dir ('jenkins-app') {
-                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'   
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'
+                dir (param.serviceFolderName) {
+                    container('python-382'){
+                        sh 'python --version'
+                    }
+
+                    container(name: 'kaniko', shell: '/busybox/sh') {
+                        sh 'pwd'
+                        sh """
+                        #!/busybox/sh 
+                        /kaniko/executor --dockerfile Dockerfile --context `pwd`/ --verbosity debug --insecure --skip-tls-verify --destination gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --destination gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest
+                        """
+                    }
                 }
             }
         }
-        stage ('build admin service into docker image - uat') {
+        stage ('build service into docker image - uat') {
             when {
                 branch 'uat'
             }
             steps {
-                dir ('jenkins-app') {
-                    sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'   
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image ls gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest'  
+
+                dir (param.serviceFolderName) {
+                    container('python-382'){
+                        sh 'python --version'
+                    }
+               
+                    container(name: 'kaniko', shell: '/busybox/sh') {
+                        sh 'pwd'
+                        sh """
+                        #!/busybox/sh 
+                        /kaniko/executor --dockerfile Dockerfile --context `pwd`/ --verbosity debug --insecure --skip-tls-verify --destination gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --destination gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest
+                        """
+                    }  
                 }
             }
         }
@@ -64,7 +151,13 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh 'kubectl --namespace jenkins-dev --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
+                container('gcloud'){
+                    sh 'kubectl version'
+                    sh 'gcloud auth activate-service-account --key-file=/secret/kaniko-secret.json'
+                    sh "gcloud container clusters get-credentials  rohan-ci-cd-cluster --region=us-central1-c"
+                    sh 'kubectl --namespace jenkins-dev get pods'
+                    sh "kubectl --namespace jenkins-dev --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER"
+                }
             }
         }
         stage ('deploy to kubernetes cluster - uat') {
@@ -72,9 +165,15 @@ pipeline {
                 branch 'uat'
             }
             steps {
-                sh 'kubectl --namespace jenkins-uat --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER'
+                container('gcloud'){
+                    sh 'kubectl version'
+                    sh 'gcloud auth activate-service-account --key-file=/secret/kaniko-secret.json'
+                    sh "gcloud container clusters get-credentials  rohan-ci-cd-cluster --region=us-central1-c"
+                    sh 'kubectl --namespace jenkins-uat get pods'
+                    sh "kubectl --namespace jenkins-uat --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER"
+                }
             }
         }
-    }
+    }  
 }
-
+}
