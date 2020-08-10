@@ -146,34 +146,26 @@ spec:
                 }
             }
         }
-        stage ('deploy to kubernetes cluster - master') {
-            when {
-                branch 'master'
-            }
-            steps {
-                container('gcloud'){
-                    sh 'kubectl version'
-                    sh 'gcloud auth activate-service-account --key-file=/secret/kaniko-secret.json'
-                    sh "gcloud container clusters get-credentials  rohan-ci-cd-cluster --region=us-central1-c"
-                    sh 'kubectl --namespace jenkins-dev get pods'
-                    sh "kubectl --namespace jenkins-dev --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER"
-                }
-            }
-        }
-        stage ('deploy to kubernetes cluster - uat') {
+        stage ('build service into docker image - prod') {
             when {
                 branch 'uat'
             }
             steps {
-                container('gcloud'){
-                    sh 'kubectl version'
-                    sh 'gcloud auth activate-service-account --key-file=/secret/kaniko-secret.json'
-                    sh "gcloud container clusters get-credentials  rohan-ci-cd-cluster --region=us-central1-c"
-                    sh 'kubectl --namespace jenkins-uat get pods'
-                    sh "kubectl --namespace jenkins-uat --cluster gke_searce-academy_us-central1-c_rohan-ci-cd-cluster set image deployment jenkins-app jenkins-app=gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER"
+
+                dir ('jenkins-app') {
+                    container('python-382'){
+                        sh 'python --version'
+                    }
+               
+                    container(name: 'kaniko', shell: '/busybox/sh') {
+                        sh 'pwd'
+                        sh """
+                        #!/busybox/sh 
+                        /kaniko/executor --dockerfile Dockerfile --context `pwd`/ --verbosity debug --insecure --skip-tls-verify --destination gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:$BUILD_NUMBER --destination gcr.io/searce-academy/rohan-ci-cd/jenkinsapp:latest
+                        """
+                    }  
                 }
             }
         }
     }  
 }
-
