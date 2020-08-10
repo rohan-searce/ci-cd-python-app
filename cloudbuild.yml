@@ -6,4 +6,3 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: Push docker image with SHA tag
   args: ['push', '${_GCR_DOCKER_IMAGE_PATH}:$COMMIT_SHA']
-
