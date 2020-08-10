@@ -46,60 +46,60 @@ pipeline {
                     credentialsId: 'Rohan-Github-Account-Credentials',
                     url: 'https://github.com/rohan-searce/ci-cd-python-app'
                     
-                dir ('mv-service') {
+                dir ('jenkins-app') {
                     sh 'python -v'
                     sh 'python app.yml'
                 }       
             }
         }
-        stage ('build admin service into docker image - master') {
+        stage ('build service into docker image - master') {
             when {
                 branch 'master'
             }
             steps {
-                dir ('mv-service') {
+                dir ('jenkins-app') {
                     sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
 
                     sh 'python -v'
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/master/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/master/jenkinsapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/master/jenkinsapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/master/jenkinsapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/master/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/master/jenkinsapp:latest'
+                    sh 'docker build --file Dockerfile --tag gcr.io/mv-auxiliary/rohan-mb/master/jenkinsapp:$BUILD_NUMBER --tag gcr.io/mv-auxiliary/rohan-mb/master/jenkinsapp:latest .'
+                    sh 'docker push gcr.io/mv-auxiliary/rohan-mb/master/jenkinsapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/mv-auxiliary/rohan-mb/master/jenkinsapp:latest'
+                    sh 'docker image rm gcr.io/mv-auxiliary/rohan-mb/master/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/mv-auxiliary/rohan-mb/master/jenkinsapp:latest'
                 }
             }
         }
-        stage ('build admin service into docker image - uat') {
+        stage ('build service into docker image - uat') {
             when {
                 branch 'uat'
             }
             steps {
-                dir ('mv-service') {
+                dir ('jenkins-app') {
                     sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
                     
                     sh 'python -v'
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/uat/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/uat/jenkinsapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/uat/jenkinsapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/uat/jenkinsapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/uat/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/uat/jenkinsapp:latest'  
+                    sh 'docker build --file Dockerfile --tag gcr.io/mv-auxiliary/rohan-mb/uat/jenkinsapp:$BUILD_NUMBER --tag gcr.io/mv-auxiliary/rohan-mb/uat/jenkinsapp:latest .'
+                    sh 'docker push gcr.io/mv-auxiliary/rohan-mb/uat/jenkinsapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/mv-auxiliary/rohan-mb/uat/jenkinsapp:latest'
+                    sh 'docker image rm gcr.io/mv-auxiliary/rohan-mb/uat/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/mv-auxiliary/rohan-mb/uat/jenkinsapp:latest'  
                 }
             }
         }
-        stage ('build admin service into docker image - prod') {
+        stage ('build service into docker image - prod') {
             when {
                 branch 'prod'
             }
             steps {
-                dir ('mv-service') {
+                dir ('jenkins-app') {
                     sh 'cat $JenkinsDockerGCRSecret | docker login --username _json_key --password-stdin https://gcr.io'
 
                     sh 'python -v'
-                    sh 'docker build --file Dockerfile --tag gcr.io/searce-academy/prod/jenkinsapp:$BUILD_NUMBER --tag gcr.io/searce-academy/prod/jenkinsapp:latest .'
-                    sh 'docker push gcr.io/searce-academy/prod/jenkinsapp:$BUILD_NUMBER'   
-                    sh 'docker push gcr.io/searce-academy/prod/jenkinsapp:latest'
-                    sh 'docker image rm gcr.io/searce-academy/prod/jenkinsapp:$BUILD_NUMBER'
-                    sh 'docker image rm gcr.io/searce-academy/prod/jenkinsapp:latest'  
+                    sh 'docker build --file Dockerfile --tag gcr.io/mv-auxiliary/rohan-mb/prod/jenkinsapp:$BUILD_NUMBER --tag gcr.io/mv-auxiliary/rohan-mb/prod/jenkinsapp:latest .'
+                    sh 'docker push gcr.io/mv-auxiliary/rohan-mb/prod/jenkinsapp:$BUILD_NUMBER'   
+                    sh 'docker push gcr.io/mv-auxiliary/rohan-mb/prod/jenkinsapp:latest'
+                    sh 'docker image rm gcr.io/mv-auxiliary/rohan-mb/prod/jenkinsapp:$BUILD_NUMBER'
+                    sh 'docker image rm gcr.io/mv-auxiliary/rohan-mb/prod/jenkinsapp:latest'  
                 }
             }
         }
