@@ -48,7 +48,7 @@ pipeline {
                     
                 dir ('jenkins-app') {
                     sh 'python -v'
-                    sh 'python app.yml'
+                    sh 'python app.py'
                 }       
             }
         }
