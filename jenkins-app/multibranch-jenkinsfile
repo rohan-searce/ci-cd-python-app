@@ -5,12 +5,14 @@ pipeline {
         JenkinsDockerGCRSecret = credentials('mv-aux-gcr')
     }
     stages {
-        always {
-            slackSend (
-                color: '#F7A200', 
-                message: "Hey, your CI has been *Started* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n${env.BUILD_URL}\n*GitHub Link: * ${GIT_BRANCH} -> ${GIT_URL}"
-            )
-            deleteDir()
+        stage ('Build Started') {
+            always {
+                slackSend (
+                    color: '#F7A200', 
+                    message: "Hey, your CI has been *Started* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n${env.BUILD_URL}\n*GitHub Link: * ${GIT_BRANCH} -> ${GIT_URL}"
+                )
+                deleteDir()
+           } 
         }
     }
     stages {
