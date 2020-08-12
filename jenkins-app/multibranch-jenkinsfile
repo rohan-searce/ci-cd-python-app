@@ -109,13 +109,13 @@ pipeline {
         success {
             slackSend (
                 color: '#00FF00', 
-                message: "Hurray! CI is *Success* and CD has been *Started* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n${env.BUILD_URL}\n*GitHub Link: * ${GIT_BRANCH} -> ${GIT_URL}"
+                message: "Hurray! CI is *Success* and CD has been *Started* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n<${env.BUILD_URL}|OPEN JENKINS BUILD>\n*GitHub Link: * ${GIT_BRANCH} -> ${GIT_URL}"
             )
         }
         failure {   
             slackSend (
                 color: '#FF0000', 
-                message: "Oops, something's wrong; CI *Failed* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n${env.BUILD_URL}\n*GitHub Link: * ${GIT_BRANCH} -> ${GIT_URL}"
+                message: "Oops, something's wrong; CI *Failed* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n<${env.BUILD_URL}|OPEN JENKINS BUILD>\n*GitHub Link: * ${GIT_BRANCH} -> ${GIT_URL}"
             )
         }
     }
