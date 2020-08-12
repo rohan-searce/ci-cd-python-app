@@ -4,7 +4,7 @@ pipeline {
     environment {
         JenkinsDockerGCRSecret = credentials('mv-aux-gcr')
     }
-    post {
+    pre {
         always {
             slackSend (
                 color: '#F7A200', 
