@@ -5,6 +5,12 @@ pipeline {
         JenkinsDockerGCRSecret = credentials('mv-aux-gcr')
     }
     stages {
+        stage ('Pre Actions-Build Started') {
+            slackSend (
+              color: '#F7A200' ,
+              message: "Hey, your CI trigger has *Started* \n*Trigger: * `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n<${env.BUILD_URL}|OPEN JENKINS BUILD>\n*GitHub Link: * ${GIT_BRANCH}" 
+            )
+        }
         stage ('git clone - master') {
             when {
                 branch 'master'
