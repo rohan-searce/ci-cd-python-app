@@ -21,7 +21,7 @@ spec:
         name: jenkinsapp-cicd
     spec:
       containers:
-      - name: test
+      - name: jenkinsapp-cicd
         image: gcr.io/searce-academy/rohan-ci-cd/jenkins-cicd/dev/jenkinsapp:latest
         imagePullPolicy: Always
 
