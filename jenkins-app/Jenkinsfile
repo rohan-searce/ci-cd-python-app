@@ -154,7 +154,7 @@ spec:
                 container('gcloud'){
                     sh 'kubectl version'
                     sh 'gcloud auth activate-service-account --key-file=/secret/kaniko-secret.json'
-                    sh "gcloud container clusters get-credentials rohan-ci-cd-cluster --region=us-central1-c"
+                    sh "gcloud container clusters get-credentials  rohan-cicd-cluster --region=us-central1-c"
                     sh 'kubectl --namespace jenkins-cicd get pods'
                     sh "kubectl --namespace jenkins-cicd --cluster gke_searce-academy_us-central1-c_rohan-cicd-cluster set image deployment jenkins-cicd jenkins-cicd jenkins-cicd jenkins-cicd=gcr.io/searce-academy/rohan-ci-cd/jenkins-cicd/dev/jenkinsapp:$BUILD_NUMBER"
                 }
@@ -168,7 +168,7 @@ spec:
                 container('gcloud'){
                     sh 'kubectl version'
                     sh 'gcloud auth activate-service-account --key-file=/secret/kaniko-secret.json'
-                    sh "gcloud container clusters get-credentials rohan-ci-cd-cluster --region=us-central1-c"
+                    sh "gcloud container clusters get-credentials rohan-cicd-cluster --region=us-central1-c"
                     sh 'kubectl --namespace jenkins-cicd get pods'
                     sh "kubectl --namespace jenkins-cicd --cluster gke_searce-academy_us-central1-c_rohan-cicd-cluster set image deployment jenkins-cicd jenkins-cicd jenkins-cicd jenkins-cicd=gcr.io/searce-academy/rohan-ci-cd/jenkins-cicd/uat/jenkinsapp:$BUILD_NUMBER"
                 }
